@@ -56,3 +56,10 @@ add_executable(Voxelly
 target_link_libraries(Voxelly PRIVATE glfw glad stb glm freetype)
 
 target_include_directories(Voxelly PRIVATE include)
+
+add_custom_command(
+    TARGET Voxelly POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/assets
+            $<TARGET_FILE_DIR:Voxelly>/assets
+)
