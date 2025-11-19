@@ -8,18 +8,18 @@ Texture::Texture() {
     glGenTextures(1, &_id);
 }
 
-Texture::Texture(const char* data, int width, int height, int channels) : Texture() {
+Texture::Texture(const unsigned char* data, int width, int height, int channels) : Texture() {
     uploadImage(data, width, height, channels);
 }
 
 Texture::Texture(const assets::Image& image)
-    : Texture(reinterpret_cast<const char*>(image.data), image.width, image.height, image.channels) {}
+    : Texture(image.getData(), image.getWidth(), image.getHeight(), image.getChannels()) {}
 
 Texture::~Texture() {
     glDeleteTextures(1, &_id);
 }
 
-void Texture::uploadImage(const char* data, int width, int height, int channels) {
+void Texture::uploadImage(const unsigned char* data, int width, int height, int channels) {
     GLenum format;
     if (channels == 1) {
         format = GL_RED;

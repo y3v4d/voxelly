@@ -3,10 +3,11 @@
 #include <memory>
 #include <map>
 
+#include "engine/assets/asset.hpp"
 #include "engine/core/core.hpp"
 
 namespace assets {
-    class Font {
+    class Font : public Asset {
     public:
         struct Glyph {
             int width;
@@ -33,14 +34,12 @@ namespace assets {
             std::unordered_map<char, Glyph> glyphs;
         };
 
-        Font() = delete;
-
-        Font(const std::string& path);
         ~Font();
 
-        const FontPage& getPage(int pixelSize);
+        virtual void loadFromBuffer(const char* data, size_t size) override;
 
-        Font& operator=(const Font&) = delete;
+        const std::string& getRawData() const { return _rawData; }
+        const FontPage& getPage(int pixelSize);
 
     private:
         struct Impl;

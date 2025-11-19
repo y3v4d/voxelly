@@ -24,11 +24,7 @@ void main() {
 
         texColor.rgb *= ambient + diffuse;
     }
-    
-    //texColor *= colorTint;
 
-    texColor.rgb += colorTint.rgb;
-    texColor.a -= colorTint.a;
-
+    texColor *= colorTint;
     FragColor = texColor;
 }

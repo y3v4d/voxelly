@@ -2,20 +2,32 @@
 
 #include "engine/core/core.hpp"
 #include "engine/assets/image.hpp"
-#include "engine/components/transform.hpp"
+#include "engine/components/transform2d.hpp"
+#include "engine/gfx/texture.hpp"
 
-class Sprite : public Transform {
+class Sprite : public Transform2D {
 public:
-    Sprite() : _image(nullptr) {}
-    Sprite(shared<assets::Image> image) : _image(image) {}
+    Sprite() : _texture(nullptr), _uvs(0.0f, 0.0f, 1.0f, 1.0f) {}
+    Sprite(shared<gfx::Texture> texture, const glm::vec4& uvs = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))
+        : _texture(texture), _uvs(uvs) {}
 
-    void setImage(shared<assets::Image> image) {
-        _image = image;
+    void setTexture(shared<gfx::Texture> texture) {
+        _texture = texture;
     }
 
-    shared<assets::Image> getImage() const {
-        return _image;
+    void setUVs(const glm::vec4& uvs) {
+        _uvs = uvs;
     }
+
+    const shared<gfx::Texture>& getTexture() const {
+        return _texture;
+    }
+
+    const glm::vec4& getUVs() const {
+        return _uvs;
+    }
+
 private:
-    shared<assets::Image> _image;
+    shared<gfx::Texture> _texture;
+    glm::vec4 _uvs;
 };

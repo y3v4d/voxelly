@@ -7,8 +7,8 @@ layout(location = 2) in vec3 aNormal;
 out vec2 TexCoord;
 out vec3 Normal;
 
-const float textureSize = 16.0;
-const vec2 atlasSize = vec2(2.0, 2.0); // 16x16 textures in the atlas
+const float textureSize = 1.0;
+const vec2 atlasSize = vec2(256.0, 256.0);
 
 uniform mat4 model;
 uniform mat4 view;
@@ -24,7 +24,7 @@ void main() {
     float texX = (float(col) + 0.5) * textureSize;
     float texY = (float(row) + 0.5) * textureSize;
 
-    TexCoord = vec2(texX / textureWidth, 1.0 - texY / textureHeight);
+    TexCoord = vec2(texX / textureWidth, texY / textureHeight);
     Normal = aNormal;
     
     gl_Position = projection * view * model * vec4(aPos, 1.0);

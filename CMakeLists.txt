@@ -40,13 +40,16 @@ add_executable(Voxelly
     src/engine/assets/file.cpp src/engine/assets/font.cpp src/engine/assets/image.cpp src/engine/assets/shader.cpp src/engine/assets/mesh.cpp
     src/engine/components/camera.cpp src/engine/components/sprite.cpp src/engine/components/text.cpp
     src/engine/core/filesystem.cpp src/engine/core/window.cpp
+    src/engine/font/font.cpp
     src/engine/gfx/buffer/index_buffer.cpp src/engine/gfx/buffer/vertex_buffer.cpp src/engine/gfx/buffer/vertex_array.cpp
     src/engine/gfx/renderer.cpp src/engine/gfx/renderer_gl.cpp src/engine/gfx/shader.cpp src/engine/gfx/texture.cpp
+    src/engine/systems/ui_renderer.cpp
     src/engine/engine.cpp
     src/chunk.cpp
     src/chunk_mesh.cpp
     src/main.cpp
     src/text_renderer.cpp
+    src/world_asset.cpp
     src/world.cpp
 )
 

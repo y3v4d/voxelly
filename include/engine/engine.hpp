@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 
+#include "engine/assets/asset-manager.hpp"
 #include "engine/assets/file.hpp"
 #include "engine/assets/font.hpp"
 #include "engine/assets/image.hpp"
@@ -13,6 +14,7 @@
 #include "engine/components/sprite.hpp"
 #include "engine/components/text.hpp"
 #include "engine/components/transform.hpp"
+#include "engine/components/transform2d.hpp"
 
 #include "engine/core/core.hpp"
 #include "engine/core/filesystem.hpp"
@@ -26,3 +28,5 @@
 #include "engine/gfx/renderer.hpp"
 #include "engine/gfx/shader.hpp"
 #include "engine/gfx/texture.hpp"
+
+#include "engine/systems/ui_renderer.hpp"

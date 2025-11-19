@@ -95,8 +95,8 @@ struct Font::Impl {
     FT_Face face;
 };
 
-Font::Font(const std::string& path) {
-    _rawData = core::FileSystem::readFromFile(path);
+void Font::loadFromBuffer(const char* data, size_t size) {
+    _rawData.assign(data, size);
     _impl = new Impl();
 
     FT_Error error = FT_New_Memory_Face(

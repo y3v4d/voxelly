@@ -12,6 +12,12 @@ namespace gfx {
         BOOL
     };
 
+    enum class BufferUsage {
+        STATIC = 0,
+        DYNAMIC,
+        STREAM
+    };
+
     struct BufferLayoutElement {
         BufferLayoutElement(BufferDataType type)
             : type(type), offset(0), normalized(false) {}
@@ -44,7 +50,7 @@ namespace gfx {
     class VertexBuffer {
     public:
         VertexBuffer() = delete;
-        VertexBuffer(const BufferLayout& layout);
+        VertexBuffer(const BufferLayout& layout, BufferUsage usage = BufferUsage::STATIC);
         
         ~VertexBuffer();
 
@@ -52,6 +58,10 @@ namespace gfx {
         void unbind() const;
 
         void setData(const void* data, uint32_t size);
+        void setSubData(const void* data, uint32_t size, uint32_t offset);
+
+        void setUsage(BufferUsage usage);
+        BufferUsage getUsage() const { return _usage; }
 
         constexpr uint32_t getID() const { return _id; }
         const BufferLayout& getLayout() const { return _layout; }
@@ -59,6 +69,7 @@ namespace gfx {
     private:
         uint32_t _id;
         BufferLayout _layout;
+        BufferUsage _usage;
     };
 
     uint32_t getBufferDataTypeSize(BufferDataType type);

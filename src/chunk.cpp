@@ -2,13 +2,6 @@
 
 Chunk::Chunk(int x, int y, int z, World* world) {
     _data.fill(0);
-    for(int y = 0; y < 1; ++y) {
-        for(int z = 0; z < CHUNK_SIZE; ++z) {
-            for(int x = 0; x < CHUNK_SIZE; ++x) {
-                setBlock(x, y, z, 1);
-            }
-        }
-    }
 
     _x = x;
     _y = y;

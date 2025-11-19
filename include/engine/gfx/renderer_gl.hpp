@@ -18,6 +18,8 @@ namespace gfx {
         void setWireframe(bool enabled) override;
         void setDepthTest(bool enabled) override;
         void setCullFace(bool enabled) override;
+        void enablePolygonOffsetFill(float factor, float units) override;
+        void disablePolygonOffsetFill() override;
 
     private:
         unique<gfx::VertexArray> _emptyVAO;

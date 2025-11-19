@@ -1,10 +1,13 @@
 #pragma once
 
 #include "chunk.hpp"
+#include "world_asset.hpp"
 
 struct WorldRayHit {
     glm::ivec3 block;
     glm::ivec3 side;
+    
+    float distance;
 };
 
 class World {
@@ -22,6 +25,9 @@ public:
     void setBlock(int x, int y, int z, unsigned char blockId);
 
     std::optional<WorldRayHit> findRayHit(const glm::vec3& origin, const glm::vec3& direction, float maxDistance) const;
+
+    static std::unique_ptr<World> loadFromAsset(const WorldAsset& asset);
+    static WorldAsset saveToAsset(const World& world);
 
 private:
     std::unordered_map<uint64_t, std::unique_ptr<Chunk>> _chunks;

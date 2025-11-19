@@ -107,3 +107,40 @@ Mesh MeshBuilder::createOutlineCube() {
 
     return mesh;
 }
+
+Mesh MeshBuilder::createPlane() {
+    Mesh mesh;
+
+    std::array<float, 4 * 3> positions = {
+        -0.5f, 0.0f, 0.5f,
+        0.5f, 0.0f, 0.5f,
+        0.5f, 0.0f, -0.5f,
+        -0.5f, 0.0f, -0.5f
+    };
+
+    std::array<float, 4 * 2> uvs = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f
+    };
+
+    std::array<float, 4 * 3> normals = {
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f
+    };
+
+    std::array<unsigned int, 6> indices = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    mesh.positions = std::vector<float>(positions.begin(), positions.end());
+    mesh.texCoords = std::vector<float>(uvs.begin(), uvs.end());
+    mesh.normals = std::vector<float>(normals.begin(), normals.end());
+    mesh.indices = std::vector<unsigned int>(indices.begin(), indices.end());
+
+    return mesh;
+}

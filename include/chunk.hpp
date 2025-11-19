@@ -16,6 +16,10 @@ public:
     unsigned char getBlock(int x, int y, int z) const;
     void setBlock(int x, int y, int z, unsigned char type);
 
+    const std::array<unsigned char, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE>& getBlocks() const {
+        return _data;
+    }
+
     void setDirty(bool dirty) { _dirty = dirty; }
     bool isDirty() const { return _dirty; }
 

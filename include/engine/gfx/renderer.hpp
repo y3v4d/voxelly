@@ -38,6 +38,9 @@ namespace gfx {
 
         virtual void setWireframe(bool enabled) = 0;
 
+        virtual void enablePolygonOffsetFill(float factor, float units) = 0;
+        virtual void disablePolygonOffsetFill() = 0;
+
     protected:
         core::Window& window;
     };

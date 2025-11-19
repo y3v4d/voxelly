@@ -44,12 +44,24 @@ uint32_t gfx::getBufferDataTypeCount(BufferDataType type) {
     assert(false && "Unknown BufferDataType!");
 }
 
+GLenum bufferUsageToGLenum(BufferUsage usage) {
+    switch (usage) {
+        case BufferUsage::STATIC: return GL_STATIC_DRAW;
+        case BufferUsage::DYNAMIC: return GL_DYNAMIC_DRAW;
+        case BufferUsage::STREAM: return GL_STREAM_DRAW;
+    }
+
+    assert(false && "Unknown BufferUsage!");
+}
+
 BufferLayout::BufferLayout(std::vector<BufferLayoutElement> elements)
     : _elements(elements), _stride(0) {
     for (auto& element : _elements) {
         element.offset = _stride;
         _stride += getBufferDataTypeSize(element.type);
     }
+
+
 }
 
 BufferLayout::BufferLayout(std::initializer_list<BufferLayoutElement> elements)
@@ -60,8 +72,11 @@ BufferLayout::BufferLayout(std::initializer_list<BufferLayoutElement> elements)
     }
 }
 
-VertexBuffer::VertexBuffer(const BufferLayout& layout) : _layout(layout) {
+VertexBuffer::VertexBuffer(const BufferLayout& layout, BufferUsage usage) : _layout(layout), _usage(usage) {
     glGenBuffers(1, &_id);
+    glBindBuffer(GL_ARRAY_BUFFER, _id);
+    glBufferData(GL_ARRAY_BUFFER, _layout.getStride(), nullptr, bufferUsageToGLenum(_usage));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     std::cout << "Created VertexBuffer with ID: " << _id << std::endl;
 }
 
@@ -80,5 +95,17 @@ void VertexBuffer::unbind() const {
 
 void VertexBuffer::setData(const void* data, uint32_t size) {
     glBindBuffer(GL_ARRAY_BUFFER, _id);
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size, data, bufferUsageToGLenum(_usage));
+}
+
+void VertexBuffer::setSubData(const void* data, uint32_t size, uint32_t offset) {
+    glBindBuffer(GL_ARRAY_BUFFER, _id);
+    glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+}
+
+void VertexBuffer::setUsage(BufferUsage usage) {
+    _usage = usage;
+
+    glBindBuffer(GL_ARRAY_BUFFER, _id);
+    glBufferData(GL_ARRAY_BUFFER, _layout.getStride(), nullptr, bufferUsageToGLenum(_usage));
 }

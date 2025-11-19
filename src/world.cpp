@@ -1,4 +1,5 @@
 #include "world.hpp"
+#include "world_asset.hpp"
 
 uint64_t getChunkKey(int x, int y, int z) {
     return (static_cast<uint64_t>(x) & 0xFFFFF) << 42 |
@@ -91,11 +92,12 @@ std::optional<WorldRayHit> World::findRayHit(const glm::vec3& origin, const glm:
     float distance = 0.0f;
 
     while(distance < maxDistance) {
-        if(getBlock(voxel.x, voxel.y, voxel.z) != 0) {
+        if(voxel.y == -1 || getBlock(voxel.x, voxel.y, voxel.z) != 0) {
             WorldRayHit hit;
 
             hit.block = voxel;
             hit.side = side;
+            hit.distance = distance;
 
             return hit;
         }
@@ -119,4 +121,47 @@ std::optional<WorldRayHit> World::findRayHit(const glm::vec3& origin, const glm:
     }
 
     return std::nullopt;
+}
+
+WorldAsset World::saveToAsset(const World& world) {
+    WorldAsset asset;
+
+    for (const auto& [key, chunk] : world._chunks) {
+        ChunkData chunkData;
+        chunkData.x = chunk->getX();
+        chunkData.y = chunk->getY();
+        chunkData.z = chunk->getZ();
+
+        auto blocks = chunk->getBlocks();
+        for (int x = 0; x < CHUNK_SIZE; ++x) {
+            for (int y = 0; y < CHUNK_SIZE; ++y) {
+                for (int z = 0; z < CHUNK_SIZE; ++z) {
+                    chunkData.data[x + CHUNK_SIZE * (y + CHUNK_SIZE * z)] = blocks[x + CHUNK_SIZE * (y + CHUNK_SIZE * z)];
+                }
+            }
+        }
+
+        asset.chunks[key] = chunkData;
+    }
+
+    return asset;
+}
+
+std::unique_ptr<World> World::loadFromAsset(const WorldAsset& asset) {
+    auto world = std::make_unique<World>();
+
+    for (const auto& [key, chunkData] : asset.chunks) {
+        Chunk* chunk = world->createChunk(chunkData.x, chunkData.y, chunkData.z);
+
+        for (int x = 0; x < CHUNK_SIZE; ++x) {
+            for (int y = 0; y < CHUNK_SIZE; ++y) {
+                for (int z = 0; z < CHUNK_SIZE; ++z) {
+                    unsigned char blockType = chunkData.data[x + CHUNK_SIZE * (y + CHUNK_SIZE * z)];
+                    chunk->setBlock(x, y, z, blockType);
+                }
+            }
+        }
+    }
+
+    return world;
 }

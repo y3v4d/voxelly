@@ -2,7 +2,29 @@
 
 #include "engine/core/core.hpp"
 
-void updateTextVao(gfx::VertexArray& vao, const Text& text) {
+void computeTextDimensions(const Text& text, float& outWidth, float& outHeight) {
+    auto& content = text.getContent();
+    auto font = text.getFont();
+    auto fontSize = text.getFontSize();
+
+    float width = 0.0f;
+    float height = 0.0f;
+
+    auto& fontPage = font->getPage(fontSize);
+
+    for(int i = 0; i < content.size(); ++i) {
+        char c = content[i];
+        auto& character = fontPage.glyphs.at(c);
+
+        width += (float)character.advance_x;
+        height = std::max(height, (float)character.height);
+    }
+
+    outWidth = width;
+    outHeight = height;
+}
+
+void updateTextVao(gfx::VertexArray& vao, Text& text) {
     auto& content = text.getContent();
     auto font = text.getFont();
     auto fontSize = text.getFontSize();
@@ -65,12 +87,17 @@ void updateTextVao(gfx::VertexArray& vao, const Text& text) {
         indices[indexOffset + 4] = i * 4 + 3;
         indices[indexOffset + 5] = i * 4 + 0;
 
-        x += character.advance_x;
-        y += character.advance_y;
+        x += (float)character.advance_x;
+        y += (float)character.advance_y;
 
         vertexOffset += 16;
         indexOffset += 6;
     }
+
+    float width, height;
+    computeTextDimensions(text, width, height);
+
+    text.size = glm::vec2(width, height);
 
     vertexBuffer->setData(vertices, numVertices * 4 * sizeof(float));
     indexBuffer->setData(indices, numIndices * sizeof(unsigned int));
@@ -91,20 +118,21 @@ unique<gfx::VertexArray> createTextVAO(const Text& text) {
     vao->setVertexBuffer(std::move(vertexBuffer));
     vao->setIndexBuffer(std::move(indexBuffer));
 
-    updateTextVao(*vao, text);
-
     return vao;
 }
 
-void TextRenderer::renderText(Text& text, float x, float y) {
+void TextRenderer::renderText(gfx::Shader& shader, Text& text) {
     if(_textVaos.find(&text) == _textVaos.end()) {
         _textVaos[&text] = createTextVAO(text);
+        updateTextVao(*_textVaos[&text], text);
+
+        text._dirty = false;
     }
 
     auto page = text.getFont()->getPage(text.getFontSize());
     auto it = _fontPageTextures.find(&page);
     if(it == _fontPageTextures.end()) {
-        auto texture = std::make_unique<gfx::Texture>((char*)page.atlas, page.width, page.height, 1);
+        auto texture = std::make_unique<gfx::Texture>(page.atlas, page.width, page.height, 1);
         if(!texture) {
             throw std::runtime_error("Failed to create font page texture.");
         }
@@ -117,6 +145,17 @@ void TextRenderer::renderText(Text& text, float x, float y) {
         text._dirty = false;
     }
 
+    auto correctedPosition = text.position - (text.anchor * text.size);
+    auto model = glm::translate(glm::mat4(1.0f), glm::vec3(correctedPosition, 0.0f)) *
+                 glm::rotate(glm::mat4(1.0f), glm::radians(text.rotation), glm::vec3(0.0f, 0.0f, 1.0f)) *
+                 glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+
+    _renderer.useShader(shader);
     _renderer.bindTexture(0, *_fontPageTextures[&page]);
+
+    shader.setUniformMat4("projection", glm::value_ptr(_camera.getProjectionMatrix()));
+    shader.setUniformMat4("view", glm::value_ptr(_camera.getViewMatrix()));
+    shader.setUniformMat4("model", glm::value_ptr(model));
+
     _renderer.drawVAO(*_textVaos[&text], gfx::RenderMode::TRIANGLES);
 }

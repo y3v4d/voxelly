@@ -13,6 +13,8 @@ struct OrthographicSettings {
     float right;
     float bottom;
     float top;
+
+    float zoom;
 };
 
 struct PerspectiveSettings {
@@ -38,6 +40,4 @@ public:
 
     float near;
     float far;
-
-    glm::mat4 projectionMatrix;
 };

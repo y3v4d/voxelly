@@ -17,5 +17,6 @@ namespace assets {
     public:
         static Mesh createCube();
         static Mesh createOutlineCube();
+        static Mesh createPlane();
     };
 }

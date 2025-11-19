@@ -2,22 +2,19 @@
 
 #include <string>
 
+#include "engine/assets/asset.hpp"
+
 namespace assets {
-    class FileAsset {
+    class FileAsset : public Asset {
     public:
-        FileAsset(const std::string& path);
         ~FileAsset();
-        
-        void load();
-        
-        const char* getData() const { return data; }
-        size_t getSize() const { return size; }
 
-        const std::string& getPath() const { return path; }
+        virtual void loadFromBuffer(const char* data, size_t size) override;
+        
+        const char* getData() const { return _data; }
+        size_t getSize() const { return _size; }
     private:
-        char* data;
-        size_t size;
-
-        std::string path;
+        char* _data;
+        size_t _size;
     };
 }

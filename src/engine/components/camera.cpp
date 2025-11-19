@@ -15,8 +15,6 @@ void Camera::setPerspective(float fov, float aspectRatio, float nearPlane, float
     perspSettings.aspectRatio = aspectRatio;
     near = nearPlane;
     far = farPlane;
-
-    projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 }
 
 void Camera::setOrthographic(float left, float right, float bottom, float top, float nearPlane, float farPlane) {
@@ -26,11 +24,10 @@ void Camera::setOrthographic(float left, float right, float bottom, float top, f
     orthoSettings.right = right;
     orthoSettings.bottom = bottom;
     orthoSettings.top = top;
+    orthoSettings.zoom = 1.0f;
 
     near = nearPlane;
     far = farPlane;
-
-    projectionMatrix = glm::ortho(left, right, bottom, top, nearPlane, farPlane);
 }
 
 glm::mat4 Camera::getViewMatrix() const {
@@ -38,5 +35,15 @@ glm::mat4 Camera::getViewMatrix() const {
 }
 
 glm::mat4 Camera::getProjectionMatrix() const {
-    return projectionMatrix;
+    if(projectionType == ProjectionType::PERSPECTIVE) {
+        return glm::perspective(glm::radians(perspSettings.fov), perspSettings.aspectRatio, near, far);
+    } else {
+        return glm::ortho(
+            orthoSettings.left * orthoSettings.zoom, 
+            orthoSettings.right * orthoSettings.zoom, 
+            orthoSettings.bottom * orthoSettings.zoom, 
+            orthoSettings.top * orthoSettings.zoom, 
+            near, far
+        );
+    }
 }

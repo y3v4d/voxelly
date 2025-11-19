@@ -16,12 +16,13 @@ GLenum getGLPrimitiveType(RenderMode mode) {
 
 RendererGL::RendererGL(core::Window& window) : Renderer(window) {
     window.makeContextCurrent();
-    window.setSwapInterval(1);
 
     int version = gladLoadGL(glfwGetProcAddress);
     if (version == 0) {
         throw std::runtime_error("Failed to initialize GLAD");
     }
+
+    window.setSwapInterval(1);
 
     std::cout << "OpenGL Version: " << GLAD_VERSION_MAJOR(version) << "." << GLAD_VERSION_MINOR(version) << std::endl;
 
@@ -32,9 +33,6 @@ RendererGL::RendererGL(core::Window& window) : Renderer(window) {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_LINE_SMOOTH);
-    glLineWidth(32.0f);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -97,4 +95,13 @@ void RendererGL::setCullFace(bool enabled) {
     } else {
         glDisable(GL_CULL_FACE);
     }
+}
+
+void RendererGL::enablePolygonOffsetFill(float factor, float units) {
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(factor, units);
+}
+
+void RendererGL::disablePolygonOffsetFill() {
+    glDisable(GL_POLYGON_OFFSET_FILL);
 }

@@ -4,10 +4,10 @@
 
 #include "engine/core/core.hpp"
 #include "engine/assets/font.hpp"
-#include "engine/components/transform.hpp"
+#include "engine/components/transform2d.hpp"
 
 class TextRenderer;
-class Text : public Transform {
+class Text : public Transform2D {
 public:
     Text() : _content(""), _font(nullptr), _fontSize(0) {}
     Text(const std::string& content, shared<assets::Font> font, int fontSize)
@@ -21,6 +21,8 @@ public:
     const std::string& getContent() const {
         return _content;
     }
+
+    int getContentWidth() const;
 
     shared<assets::Font> getFont() const {
         return _font;
