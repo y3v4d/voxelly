@@ -8,6 +8,9 @@ namespace core {
         static std::string readFromFile(const std::string& path);
         static void writeToFile(const std::string& path, const std::string& content);
 
+        static std::string getExecutablePath();
+        static std::string getDataPath();
+
     private:
         FileSystem() = default;
         ~FileSystem() = default;

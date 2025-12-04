@@ -2,6 +2,7 @@
 
 #include "engine/core/core.hpp"
 #include "engine/components/transform.hpp"
+#include "ray.hpp"
 
 enum class ProjectionType {
     ORTHOGRAPHIC,
@@ -32,6 +33,8 @@ public:
 
     void setPerspective(float fov, float aspectRatio, float nearPlane, float farPlane);
     void setOrthographic(float left, float right, float bottom, float top, float nearPlane, float farPlane);
+
+    Ray getRayFromScreenCoords(float screenX, float screenY, float screenWidth, float screenHeight) const;
 
     ProjectionType projectionType;
 

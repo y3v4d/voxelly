@@ -1,7 +1,7 @@
 #pragma once
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_video.h>
 
 #include <memory>
 #include <functional>
@@ -11,6 +11,7 @@ namespace core {
     using WindowMouseScrollEvent = std::function<void(double xoffset, double yoffset)>;
     using WindowMouseButtonEvent = std::function<void(int button)>;
     using WindowMouseMoveEvent = std::function<void(double xpos, double ypos)>;
+    using WindowResizeEvent = std::function<void(int width, int height)>;
 
     class Window {
     public:
@@ -19,6 +20,7 @@ namespace core {
 
         bool shouldClose() const;
         void swapBuffers();
+        void processEvent(const SDL_Event& event);
         void pollEvents();
         void makeContextCurrent();
         void setSwapInterval(int interval);
@@ -26,10 +28,10 @@ namespace core {
         void setCursorLocked(bool locked);
 
         int getKeyState(int key) const;
-        void getMousePosition(double& xpos, double& ypos) const;
+        void getMousePosition(float& xpos, float& ypos) const;
         int getMouseButtonState(int button) const;
 
-        void setMousePosition(double xpos, double ypos);
+        void setMousePosition(float xpos, float ypos);
 
         int getWidth() const;
         int getHeight() const;
@@ -55,9 +57,14 @@ namespace core {
         WindowMouseScrollEvent getMouseScrollCallback() const { return _mouseScrollCallback; }
         void setMouseScrollCallback(WindowMouseScrollEvent callback);
 
+        WindowResizeEvent getResizeCallback() const { return _resizeCallback; }
+        void setResizeCallback(WindowResizeEvent callback);
+
     private:
         struct Impl;
         Impl* _impl;
+
+        bool _shouldClose = false;
 
         WindowKeyboardEvent _keyDownCallback;
         WindowKeyboardEvent _keyUpCallback;
@@ -66,5 +73,6 @@ namespace core {
         WindowMouseButtonEvent _mouseButtonUpCallback;
         WindowMouseMoveEvent _mouseMoveCallback;
         WindowMouseScrollEvent _mouseScrollCallback;
+        WindowResizeEvent _resizeCallback;
     };
 }

@@ -41,7 +41,10 @@ namespace gfx {
         virtual void enablePolygonOffsetFill(float factor, float units) = 0;
         virtual void disablePolygonOffsetFill() = 0;
 
+        unsigned int getDrawCallCount() const { return drawCallCount; }
+
     protected:
         core::Window& window;
+        unsigned int drawCallCount = 0;
     };
 }

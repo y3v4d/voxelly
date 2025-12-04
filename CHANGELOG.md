@@ -1,3 +1,32 @@
+# Version 0.0.2 - 04/12/2025
+
+Added Emscripten and ES 3.2 compilation support, new tools, better controls.
+
+- Added Emscripten and ES 3.2 compilation support
+- Replaced GLFW with SDL3 for better compatibility with Emscripten
+- Added more proper tool system with Place, Erase, Brush, Line, Move tools
+- Added tool shape support with Sphere and Cube shape
+- Added axis lock support
+- Integrated SDL_main callback approach
+- Added executable path and data path getters to FileSystem
+- Fixed invalid data size for UIRenderer shared VAO
+- Added WorldMesh class to create and manage World chunk meshes
+- Added Ray class with utility functions
+- Added getRayFromScreenCoords helper Camera function
+- Converted Shader in assets to Asset child
+- Converted Image in assets to Asset child
+- Added negative number guards in all World functions
+- Renamed all uniforms to u_<Name> format
+- Moved entire game initialization and logic to Game class
+- Added block counter to Chunk
+- Added format to internal format conversion system to support more precise formats required for OpenGL ES textures
+- Replaced separate .vert, .frag shader files with unified custom .glsl format to make cross-compiling OpenGL and OpenGL ES easier.
+- Added draw call counter in RendererGL
+- WebGL RendererGL::setWireframe has no implementation
+- Moved glad initialization from RendererGL to Window
+- Added native and web CMakePresets
+- Added unused ui.graph and basic-sprite.mat assets
+
 # Version 0.0.1 - 19/11/2025
 
 Initial semi-working version of Voxelly with the following changes:

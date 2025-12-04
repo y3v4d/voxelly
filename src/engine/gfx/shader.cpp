@@ -1,6 +1,11 @@
 #include "engine/gfx/shader.hpp"
 
+#ifdef __EMSCRIPTEN__
+#include <glad/gles2.h>
+#else
 #include <glad/gl.h>
+#endif
+
 #include <iostream>
 
 using namespace gfx;
@@ -14,6 +19,18 @@ int shader_type_to_gl(ShaderType type) {
 }
 
 int compile_shader(const char* source, ShaderType type) {
+    std::string srcStr(source);
+
+    #ifdef __EMSCRIPTEN__
+    srcStr =    std::string("#version 300 es\n") +
+                std::string("precision mediump float;\n") +
+                srcStr;
+    #else
+        srcStr = "#version 330 core\n" + srcStr;
+    #endif
+
+    source = srcStr.c_str();
+    
     unsigned int shader = glCreateShader(shader_type_to_gl(type));
     glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
@@ -83,6 +100,11 @@ void Shader::setUniformMat4(const char* name, const float* matrix) {
 void Shader::setUniformVec3(const char* name, float x, float y, float z) {
     int location = glGetUniformLocation(_id, name);
     glUniform3f(location, x, y, z);
+}
+
+void Shader::setUniformVec3(const char* name, const float* vec) {
+    int location = glGetUniformLocation(_id, name);
+    glUniform3fv(location, 1, vec);
 }
 
 void Shader::setUniformVec4(const char* name, float x, float y, float z, float w) {

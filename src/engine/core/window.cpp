@@ -3,123 +3,86 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <SDL3/SDL.h>
+
+#ifdef __EMSCRIPTEN__
+#include <glad/gles2.h>
+#else
+#include <glad/gl.h>
+#endif
+
 using namespace core;
 
 struct Window::Impl {
-    GLFWwindow* window;
+    SDL_Window* window;
+    SDL_GLContext context;
 };
 
-static void error_callback(int error, const char* description) {
-    std::cout << "Error: " << description << std::endl;
-}
-
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if(!win) {
-        return;
-    }
-
-    if(action == GLFW_PRESS && win->getKeyDownCallback()) {
-        win->getKeyDownCallback()(key);
-    }
-
-    if(action == GLFW_RELEASE && win->getKeyUpCallback()) {
-        win->getKeyUpCallback()(key);
-    }
-}
-
-static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if(!win) {
-        return;
-    }
-
-    if(win->getMouseScrollCallback()) {
-        win->getMouseScrollCallback()(xoffset, yoffset);
-    }
-}
-
-static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if(!win) {
-        return;
-    }
-
-    if(action == GLFW_PRESS && win->getMouseButtonDownCallback()) {
-        win->getMouseButtonDownCallback()(button);
-    }
-
-    if(action == GLFW_RELEASE && win->getMouseButtonUpCallback()) {
-        win->getMouseButtonUpCallback()(button);
-    }
-}
-
-static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
-    Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if(!win) {
-        return;
-    }
-
-    if(win->getMouseMoveCallback()) {
-        win->getMouseMoveCallback()(xpos, ypos);
-    }
-}
-
 Window::Window(int width, int height, const char* title) {
-    if(!glfwInit()) {
-        throw std::runtime_error("Failed to initialize GLFW");
-    }
-
     _impl = new Impl();
 
-    glfwSetErrorCallback(error_callback);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
 
-    _impl->window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+    #ifdef __EMSCRIPTEN__
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2); 
+    #else
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    #endif
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+    _impl->window = SDL_CreateWindow(title, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_RESIZABLE);
     if (!_impl->window) {
-        glfwTerminate();
-        throw std::runtime_error("Failed to create GLFW window");
+        throw std::runtime_error("Failed to create SDL window");
     }
 
-    glfwSetWindowUserPointer(_impl->window, this);
-    glfwSetKeyCallback(_impl->window, key_callback);
-    glfwSetScrollCallback(_impl->window, scroll_callback);
-    glfwSetCursorPosCallback(_impl->window, cursor_position_callback);
-    glfwSetMouseButtonCallback(_impl->window, mouse_button_callback);
+    _impl->context = SDL_GL_CreateContext(_impl->window);
+    if (!_impl->context) {
+        throw std::runtime_error("Failed to create OpenGL context: " + std::string(SDL_GetError()));
+    }
 
-    // raw input
-    glfwSetInputMode(_impl->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+#ifdef __EMSCRIPTEN__
+    int version = gladLoadGLES2(SDL_GL_GetProcAddress);
+#else
+    int version = gladLoadGL(SDL_GL_GetProcAddress);
+#endif
+    if (version == 0) {
+        throw std::runtime_error("Failed to initialize GLAD");
+    }
+
+    std::cout << "OpenGL Version: " << GLAD_VERSION_MAJOR(version) << "." << GLAD_VERSION_MINOR(version) << std::endl;
 }
 
 Window::~Window() {
     if(_impl && _impl->window) {
-        glfwDestroyWindow(_impl->window);
+        SDL_DestroyWindow(_impl->window);
     }
-    glfwTerminate();
+
     delete _impl;
 }
 
-int Window::getKeyState(int key) const {
-    return glfwGetKey(_impl->window, key);
+int Window::getKeyState(int code) const {
+    const bool* state = SDL_GetKeyboardState(NULL);
+    return state[code];
 }
 
 bool Window::shouldClose() const {
-    return glfwWindowShouldClose(_impl->window);
+    return _shouldClose;
 }
 
 void Window::setSwapInterval(int interval) {
-    glfwSwapInterval(interval);
+    SDL_GL_SetSwapInterval(interval);
 }
 
 void Window::setCursorLocked(bool locked) {
     if(locked) {
-        glfwSetInputMode(_impl->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        SDL_SetWindowRelativeMouseMode(_impl->window, true);
     } else {
-        glfwSetInputMode(_impl->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        SDL_SetWindowRelativeMouseMode(_impl->window, false);
     }
 }
 
@@ -147,54 +110,106 @@ void Window::setMouseScrollCallback(WindowMouseScrollEvent callback) {
     _mouseScrollCallback = callback;
 }
 
+void Window::setResizeCallback(WindowResizeEvent callback) {
+    _resizeCallback = callback;
+}
+
 void Window::swapBuffers() {
-    glfwSwapBuffers(_impl->window);
+    SDL_GL_SwapWindow(_impl->window);
 }
 
 void Window::pollEvents() {
-    glfwPollEvents();
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        processEvent(event);
+    }
+}
+
+void Window::processEvent(const SDL_Event& event) {
+    switch (event.type) {
+        case SDL_EVENT_QUIT:
+            _shouldClose = true;
+            break;
+        case SDL_EVENT_KEY_DOWN:
+            if (_keyDownCallback) {
+                _keyDownCallback(event.key.scancode);
+            }
+            break;
+        case SDL_EVENT_KEY_UP:
+            if (_keyUpCallback) {
+                _keyUpCallback(event.key.scancode);
+            }
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            if (_mouseButtonDownCallback) {
+                _mouseButtonDownCallback(event.button.button);   
+            }
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            if (_mouseButtonUpCallback) {
+                _mouseButtonUpCallback(event.button.button);
+            }
+            break;
+        case SDL_EVENT_MOUSE_MOTION:
+            if (_mouseMoveCallback) {
+                _mouseMoveCallback(event.motion.x, event.motion.y);
+            }
+            break;
+        case SDL_EVENT_MOUSE_WHEEL:
+            if (_mouseScrollCallback) {
+                _mouseScrollCallback(event.wheel.x, event.wheel.y);
+            }
+            break;
+        case SDL_EVENT_WINDOW_RESIZED:
+            if (_resizeCallback) {
+                _resizeCallback(event.window.data1, event.window.data2);
+            }
+            break;
+        default:
+            break;
+    }
 }
 
 void Window::makeContextCurrent() {
-    glfwMakeContextCurrent(_impl->window);
+    SDL_GL_MakeCurrent(_impl->window, _impl->context);
 }
 
-void Window::getMousePosition(double& xpos, double& ypos) const {
-    glfwGetCursorPos(_impl->window, &xpos, &ypos);
+void Window::getMousePosition(float& xpos, float& ypos) const {
+    SDL_GetMouseState(&xpos, &ypos);
 }
 
-void Window::setMousePosition(double xpos, double ypos) {
-    glfwSetCursorPos(_impl->window, xpos, ypos);
+void Window::setMousePosition(float xpos, float ypos) {
+    SDL_WarpMouseInWindow(_impl->window, static_cast<int>(xpos), static_cast<int>(ypos));
 }
 
 int Window::getMouseButtonState(int button) const {
-    return glfwGetMouseButton(_impl->window, button);
+    return SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MASK(button);
 }
 
 int Window::getWidth() const {
     int width;
-    glfwGetWindowSize(_impl->window, &width, NULL);
+    SDL_GetWindowSize(_impl->window, &width, NULL);
 
     return width;
 }
 
 int Window::getHeight() const {
     int height;
-    glfwGetWindowSize(_impl->window, NULL, &height);
+    SDL_GetWindowSize(_impl->window, NULL, &height);
 
     return height;
 }
 
 int Window::getFramebufferWidth() const {
     int width;
-    glfwGetFramebufferSize(_impl->window, &width, NULL);
-
+    SDL_GetWindowSizeInPixels(_impl->window, &width, NULL);
+    
     return width;
 }
 
 int Window::getFramebufferHeight() const {
     int height;
-    glfwGetFramebufferSize(_impl->window, NULL, &height);
+    SDL_GetWindowSizeInPixels(_impl->window, NULL, &height);
 
     return height;
 }

@@ -1,6 +1,13 @@
 #include "engine/gfx/renderer_gl.hpp"
 #include "engine/core/window.hpp"
+
+#include <SDL3/SDL_video.h>
+
+#ifdef __EMSCRIPTEN__
+#include <glad/gles2.h>
+#else
 #include <glad/gl.h>
+#endif
 
 #include <iostream>
 
@@ -16,15 +23,7 @@ GLenum getGLPrimitiveType(RenderMode mode) {
 
 RendererGL::RendererGL(core::Window& window) : Renderer(window) {
     window.makeContextCurrent();
-
-    int version = gladLoadGL(glfwGetProcAddress);
-    if (version == 0) {
-        throw std::runtime_error("Failed to initialize GLAD");
-    }
-
     window.setSwapInterval(1);
-
-    std::cout << "OpenGL Version: " << GLAD_VERSION_MAJOR(version) << "." << GLAD_VERSION_MINOR(version) << std::endl;
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -52,12 +51,16 @@ void RendererGL::drawVAO(const VertexArray& vao, RenderMode mode) {
     vao.bind();
     glDrawElements(getGLPrimitiveType(mode), vao.getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
     vao.unbind();
+
+    drawCallCount++;
 }
 
 void RendererGL::drawEmpty(int count) {
     _emptyVAO->bind();
     glDrawArrays(GL_TRIANGLES, 0, count);
     _emptyVAO->unbind();
+
+    drawCallCount++;
 }
 
 void RendererGL::useShader(const Shader& shader) {
@@ -82,11 +85,14 @@ void RendererGL::setDepthTest(bool enabled) {
 }
 
 void RendererGL::setWireframe(bool enabled) {
+    #if __EMSCRIPTEN__
+    #else
     if (enabled) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
+    #endif
 }
 
 void RendererGL::setCullFace(bool enabled) {

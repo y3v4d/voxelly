@@ -12,10 +12,13 @@ namespace assets {
         std::shared_ptr<T> loadAsset(const std::string& path, bool forceReload = false) {
             static_assert(std::is_base_of<Asset, T>::value, "T must be derived from Asset");
 
-            auto it = _assets.find(path);
+            auto base = core::FileSystem::getExecutablePath();
+            std::string fullPath = base + path;
+
+            auto it = _assets.find(fullPath);
             if(it != _assets.end()) {
                 if(forceReload) {
-                    auto buffer = core::FileSystem::readFromFile(path);
+                    auto buffer = core::FileSystem::readFromFile(fullPath);
                     it->second->loadFromBuffer(buffer.data(), buffer.size());
                 }
 
@@ -23,16 +26,19 @@ namespace assets {
             }
 
             std::shared_ptr<T> asset = std::make_shared<T>();
-            auto buffer = core::FileSystem::readFromFile(path);
+            auto buffer = core::FileSystem::readFromFile(fullPath);
             
             asset->loadFromBuffer(buffer.data(), buffer.size());
-            _assets.emplace(path, asset);
+            _assets.emplace(fullPath, asset);
 
             return asset;
         }
 
         void releaseAsset(const std::string& path) {
-            _assets.erase(path);
+            auto base = core::FileSystem::getExecutablePath();
+            std::string fullPath = base + path;
+
+            _assets.erase(fullPath);
         }
 
         void releaseAllAssets() {

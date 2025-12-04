@@ -21,8 +21,8 @@ std::unique_ptr<gfx::VertexArray> createQuadVAO(gfx::BufferUsage usage) {
         gfx::BufferLayoutElement(gfx::BufferDataType::FLOAT2)
     }), usage);
 
-    vertexBuffer->setData(vertices, sizeof(vertices) * sizeof(float));
-    indexBuffer->setData(indices, sizeof(indices) * sizeof(int));
+    vertexBuffer->setData(vertices, sizeof(vertices));
+    indexBuffer->setData(indices, sizeof(indices));
 
     auto vao = std::make_unique<gfx::VertexArray>();
     vao->setVertexBuffer(std::move(vertexBuffer));
@@ -32,16 +32,14 @@ std::unique_ptr<gfx::VertexArray> createQuadVAO(gfx::BufferUsage usage) {
 }
 
 void updateQuadVAOUVs(gfx::VertexArray& vao, const glm::vec4& uvs) {
-    float vertices[] = {
+    const float vertices[] = {
         0.0f, 0.0f, uvs.x, uvs.y,
         1.0f, 0.0f, uvs.z, uvs.y,
         1.0f, 1.0f, uvs.z, uvs.w,
         0.0f, 1.0f, uvs.x, uvs.w,
     };
-
-    std::cout << "Updating Quad VAO UVs to: " << uvs.x << ", " << uvs.y << ", " << uvs.z << ", " << uvs.w << std::endl;
-
-    vao.getVertexBuffer()->setData(vertices, sizeof(vertices) * sizeof(float));
+    
+    vao.getVertexBuffer()->setData(vertices, sizeof(vertices));
 }
 
 UIRenderer::UIRenderer(gfx::Renderer& renderer, const Camera& camera)
@@ -63,9 +61,9 @@ void UIRenderer::renderQuad(gfx::Shader& shader, const gfx::Texture& texture, fl
                         glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f)) *
                         glm::scale(glm::mat4(1.0f), glm::vec3(width, height, 1.0f));
 
-    shader.setUniformMat4("model", glm::value_ptr(model));
-    shader.setUniformMat4("view", glm::value_ptr(_camera.getViewMatrix()));
-    shader.setUniformMat4("projection", glm::value_ptr(_camera.getProjectionMatrix()));
+    shader.setUniformMat4("u_Model", glm::value_ptr(model));
+    shader.setUniformMat4("u_View", glm::value_ptr(_camera.getViewMatrix()));
+    shader.setUniformMat4("u_Projection", glm::value_ptr(_camera.getProjectionMatrix()));
     
     _renderer.drawVAO(*_quadVAO, gfx::RenderMode::TRIANGLES);
 }
@@ -81,10 +79,13 @@ void UIRenderer::renderSprite(gfx::Shader& shader, const Sprite& sprite) {
                         glm::rotate(glm::mat4(1.0f), glm::radians(sprite.rotation), glm::vec3(0.0f, 0.0f, 1.0f)) *
                         glm::scale(glm::mat4(1.0f), glm::vec3(sprite.size, 1.0f));
 
-    shader.setUniformMat4("model", glm::value_ptr(model));
-    shader.setUniformMat4("view", glm::value_ptr(_camera.getViewMatrix()));
-    shader.setUniformMat4("projection", glm::value_ptr(_camera.getProjectionMatrix()));
-    shader.setUniformInt("useColor", 0);
+    auto mvp = _camera.getProjectionMatrix() * _camera.getViewMatrix() * model;
+    auto color = sprite.getColor();
+
+    shader.setUniformMat4("u_MVP", glm::value_ptr(mvp));
+    shader.setUniformVec4("u_Color", color.r, color.g, color.b, color.a);
+    shader.setUniformInt("u_UseColor", 1);
+    shader.setUniformInt("u_UseTexture", 1);
 
     _renderer.drawVAO(*_spriteVAO, gfx::RenderMode::TRIANGLES);
 }

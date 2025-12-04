@@ -153,9 +153,9 @@ void TextRenderer::renderText(gfx::Shader& shader, Text& text) {
     _renderer.useShader(shader);
     _renderer.bindTexture(0, *_fontPageTextures[&page]);
 
-    shader.setUniformMat4("projection", glm::value_ptr(_camera.getProjectionMatrix()));
-    shader.setUniformMat4("view", glm::value_ptr(_camera.getViewMatrix()));
-    shader.setUniformMat4("model", glm::value_ptr(model));
+    shader.setUniformMat4("u_Projection", glm::value_ptr(_camera.getProjectionMatrix()));
+    shader.setUniformMat4("u_View", glm::value_ptr(_camera.getViewMatrix()));
+    shader.setUniformMat4("u_Model", glm::value_ptr(model));
 
     _renderer.drawVAO(*_textVaos[&text], gfx::RenderMode::TRIANGLES);
 }
