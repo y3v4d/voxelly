@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(Voxelly)
+project(Voxelly VERSION 0.0.2)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -83,8 +83,8 @@ if(EMSCRIPTEN)
     add_custom_command(
         TARGET Voxelly POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_SOURCE_DIR}/build-templates/web/index.html
-                ${CMAKE_BINARY_DIR}/index.html
+                ${CMAKE_SOURCE_DIR}/build-templates/web/*
+                ${CMAKE_BINARY_DIR}/
     )
 endif()
 

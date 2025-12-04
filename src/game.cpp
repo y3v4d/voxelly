@@ -39,7 +39,7 @@ void Game::init() {
     y_plane = -1;
 
     assetManager = std::make_unique<assets::AssetManager>();
-    window = std::make_unique<core::Window>(1280, 720, "Voxelly | v0.0.1");
+    window = std::make_unique<core::Window>(1280, 720, "Voxelly | v0.0.2");
 
     std::cout << "Filesystem Base Path: " << core::FileSystem::getExecutablePath() << std::endl;
     std::cout << "Filesystem Data Path: " << core::FileSystem::getDataPath() << std::endl;
