@@ -29,6 +29,16 @@ void Chunk::setBlock(int x, int y, int z, unsigned char type) {
         return;
     }
 
-    _data[z * CHUNK_SIZE * CHUNK_SIZE + y * CHUNK_SIZE + x] = type;
+    int index = z * CHUNK_SIZE * CHUNK_SIZE + y * CHUNK_SIZE + x;
+    if(_data[index] == type) {
+        return;
+    }
+    
+    _data[index] = type;
+    if(type == 0) {
+        _blockCount = std::max(0, _blockCount - 1);
+    } else {
+        _blockCount++;
+    }
     _dirty = true;
 }

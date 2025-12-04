@@ -1,0 +1,10 @@
+- name: basic-sprite.mat
+- type: Material
+- shader: assets/shaders/basic-2d.shader
+- properties:
+  - u_UseColor:
+    type: Int
+    value: 0
+  - u_UseTexture:
+    type: Int
+    value: 1

@@ -1,14 +1,12 @@
 #pragma once
 
 #include "engine/core/core.hpp"
+#include "engine/assets/asset.hpp"
 
 namespace assets {
-    class Image {
+    class Image : public Asset {
     public:
         Image() : _width(0), _height(0), _channels(0), _data(nullptr) {}
-
-        Image(const std::string& path);
-
         Image(unsigned int width, unsigned int height, unsigned int channels)
             : _width(width), _height(height), _channels(channels) {
             _data = new unsigned char[width * height * channels];
@@ -18,7 +16,9 @@ namespace assets {
         Image(unsigned int w, unsigned int h, unsigned int c, unsigned char* d)
             : _width(w), _height(h), _channels(c), _data(d) {}
 
-        ~Image();
+        virtual ~Image() override;
+
+        virtual void loadFromBuffer(const char* data, size_t size) override;
 
         void resize(unsigned int width, unsigned int height);
         void setPixel(unsigned int x, unsigned int y, const glm::vec4& color);

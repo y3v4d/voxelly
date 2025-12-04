@@ -6,6 +6,7 @@
 namespace assets {
     class Asset {
     public:
+        Asset() = default;
         virtual ~Asset() = default;
 
         virtual void loadFromBuffer(const char* data, size_t size) = 0;

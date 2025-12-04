@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <SDL3/SDL.h>
+
 using namespace core;
 
 std::string FileSystem::readFromFile(const std::string& path) {
@@ -24,7 +26,7 @@ std::string FileSystem::readFromFile(const std::string& path) {
 }
 
 void FileSystem::writeToFile(const std::string& path, const std::string& content) {
-    std::ofstream file(path, std::ios::binary);
+    std::ofstream file(path, std::ios::binary | std::ios::out);
     if(!file) {
         throw std::runtime_error("Failed to open file for writing: " + path);
     }
@@ -35,4 +37,22 @@ void FileSystem::writeToFile(const std::string& path, const std::string& content
     }
 
     file.close();
+}
+
+std::string FileSystem::getExecutablePath() {
+    const char* basePath = SDL_GetBasePath();
+    if (basePath) {
+        return std::string(basePath);
+    }
+
+    return std::string("./");
+}
+
+std::string FileSystem::getDataPath() {
+    const char* dataPath = SDL_GetPrefPath("y3v4d", "voxelly");
+    if (dataPath) {
+        return std::string(dataPath);
+    }
+
+    return std::string("./");
 }

@@ -47,3 +47,25 @@ glm::mat4 Camera::getProjectionMatrix() const {
         );
     }
 }
+
+Ray Camera::getRayFromScreenCoords(float screenX, float screenY, float screenWidth, float screenHeight) const {
+    auto viewMatrix = getViewMatrix();
+    auto projectionMatrix = getProjectionMatrix();
+
+    glm::vec3 nearPlane = glm::unProject(
+        glm::vec3(screenX, screenY, 0.0f),
+        viewMatrix,
+        projectionMatrix,
+        glm::vec4(0, 0, screenWidth, screenHeight)
+    );
+
+    glm::vec3 farPlane = glm::unProject(
+        glm::vec3(screenX, screenY, 1.0f),
+        viewMatrix,
+        projectionMatrix,
+        glm::vec4(0, 0, screenWidth, screenHeight)
+    );
+
+    glm::vec3 direction = glm::normalize(farPlane - nearPlane);
+    return Ray(nearPlane, direction);
+}

@@ -6,21 +6,28 @@
 
 using namespace assets;
 
-Image::Image(const std::string& path) {
-    stbi_set_flip_vertically_on_load(true);
-
-    auto buffer = core::FileSystem::readFromFile(path);
-    _data = stbi_load_from_memory(
-        reinterpret_cast<const unsigned char*>(buffer.data()), 
-        static_cast<int>(buffer.size()), 
-        &_width, &_height, &_channels, 
-        0
-    );
-}
-
 Image::~Image() {
     if (_data) {
         stbi_image_free(_data);
+    }
+}
+
+void Image::loadFromBuffer(const char* data, size_t size) {
+    stbi_set_flip_vertically_on_load(true);
+
+    if (_data) {
+        stbi_image_free(_data);
+    }
+
+    _data = stbi_load_from_memory(
+        reinterpret_cast<const unsigned char*>(data), 
+        static_cast<int>(size), 
+        &_width, &_height, &_channels, 
+        0
+    );
+
+    if (!_data) {
+        throw std::runtime_error("Failed to load image from buffer");
     }
 }
 

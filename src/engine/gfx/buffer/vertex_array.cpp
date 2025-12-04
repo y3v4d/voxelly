@@ -1,7 +1,10 @@
 #include "engine/gfx/buffer/vertex_array.hpp"
 
-#include <iostream>
+#ifdef __EMSCRIPTEN__
+#include <glad/gles2.h>
+#else
 #include <glad/gl.h>
+#endif
 
 using namespace gfx;
 
@@ -26,12 +29,10 @@ static uint32_t getGLType(BufferDataType type) {
 
 VertexArray::VertexArray() {
     glGenVertexArrays(1, &_id);
-    std::cout << "Created VertexArray with ID: " << _id << std::endl;
 }
 
 VertexArray::~VertexArray() {
     glDeleteVertexArrays(1, &_id);
-    std::cout << "Deleted VertexArray with ID: " << _id << std::endl;
 }
 
 void VertexArray::bind() const {

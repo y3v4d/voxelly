@@ -18,11 +18,17 @@ void WorldAsset::saveToFile(const std::string& filepath) const {
         buffer.write(reinterpret_cast<const char*>(&chunk), sizeof(chunk));
     }
 
-    core::FileSystem::writeToFile(filepath, buffer.str());
+    auto base = core::FileSystem::getDataPath();
+    
+    std::string fullPath = base + filepath;
+    core::FileSystem::writeToFile(fullPath, buffer.str());
 }
 
 WorldAsset WorldAsset::loadFromFile(const std::string& filepath) {
-    std::string buffer = core::FileSystem::readFromFile(filepath);
+    auto base = core::FileSystem::getExecutablePath();
+    std::string fullPath = base + filepath;
+
+    std::string buffer = core::FileSystem::readFromFile(fullPath);
     std::istringstream file(buffer);
 
     WorldAsset worldAsset;

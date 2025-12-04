@@ -9,6 +9,7 @@ public:
 
     void updateMesh() const;
     const gfx::VertexArray& getVertexArray() const { return _vao; }
+    Chunk* getChunk() const { return _chunk; }
 
 private:
     Chunk* _chunk;

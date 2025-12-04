@@ -2,7 +2,12 @@
 
 #include <cassert>
 #include <iostream>
+
+#ifdef __EMSCRIPTEN__
+#include <glad/gles2.h>
+#else
 #include <glad/gl.h>
+#endif
 
 using namespace gfx;
 
@@ -77,12 +82,10 @@ VertexBuffer::VertexBuffer(const BufferLayout& layout, BufferUsage usage) : _lay
     glBindBuffer(GL_ARRAY_BUFFER, _id);
     glBufferData(GL_ARRAY_BUFFER, _layout.getStride(), nullptr, bufferUsageToGLenum(_usage));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    std::cout << "Created VertexBuffer with ID: " << _id << std::endl;
 }
 
 VertexBuffer::~VertexBuffer() {
     glDeleteBuffers(1, &_id);
-    std::cout << "Deleted VertexBuffer with ID: " << _id << std::endl;
 }
 
 void VertexBuffer::bind() const {

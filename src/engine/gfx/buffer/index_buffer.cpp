@@ -1,18 +1,19 @@
 #include "engine/gfx/buffer/index_buffer.hpp"
 
-#include <iostream>
+#ifdef __EMSCRIPTEN__
+#include <glad/gles2.h>
+#else
 #include <glad/gl.h>
+#endif
 
 using namespace gfx;
 
 IndexBuffer::IndexBuffer() {
     glGenBuffers(1, &_id);
-    std::cout << "Created IndexBuffer with ID: " << _id << std::endl;
 }
 
 IndexBuffer::~IndexBuffer() {
     glDeleteBuffers(1, &_id);
-    std::cout << "Deleted IndexBuffer with ID: " << _id << std::endl;
 }
 
 void IndexBuffer::bind() const {
